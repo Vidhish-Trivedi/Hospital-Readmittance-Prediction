@@ -37,7 +37,7 @@ The aim of the challenge was to predict whether a patient would be *readmitted* 
 - diabetesMed: Indicates if there was any diabetic medication prescribed.
 - readmission_id: Days to inpatient readmission (label).
 
-## EDA
+## ! EDA
 ### Tableau Plots, Matplotlib / Seaborn
 
 
@@ -74,12 +74,13 @@ lower_whisker = Q1 - 1.5 * IQR
 upper_whisker = Q3 + 1.5 * IQR
 ```
 ### Grouping / Not Grouping
-The given dataset inherently contains categorical columns which can be grouped further. Examples of such columns include discharge
+
+
 ### Label / OHE / Avg for age
 
 ## New Columns Introduced
 ### Drug change counting
-### Grouping Numerical values for inpatient / outpatient / emergency
+### ! Grouping Numerical values for inpatient / outpatient / emergency
 
 ### Frequency for patient_id
 
@@ -90,14 +91,15 @@ The given dataset inherently contains categorical columns which can be grouped f
 - RF
 - XGBoost
 - LGBClassifier
-- CatBoost
-- Logistic Regression
-- Give detailed descriptions for 2 model and 3 model approach
+- ! CatBoost
+- ! Logistic Regression
+- ! Give detailed descriptions for 2 model and 3 model approach
 
 ## Hyper parameter Tuning
-
+- ! Grid Search - submit_40
 
 ## Validation
+
 
 
 ## Final Results
