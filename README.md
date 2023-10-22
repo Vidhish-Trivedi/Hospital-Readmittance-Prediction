@@ -208,7 +208,7 @@ df.drop(["number_outpatient", "number_inpatient", "number_emergency"],axis=1, in
 However we noticed that this apprach led to a very similar validation score to when the three columns existed individually. Hence, we stuck with the 3 original columns.
 ### Frequency for patient_id
 
-- Test Data: We introduced a new column called 'f_patient_id' which counts the number of visits for a given patient_id and assigns that number to all rows that corresponds to that patient_id.
+- Train Data: We introduced a new column called 'f_patient_id' which counts the number of visits for a given patient_id and assigns that number to all rows that corresponds to that patient_id.
 
 ```python
 df['f_patient_id'] = df['patient_id'].copy(deep=True)
@@ -219,7 +219,7 @@ for i in df['patient_id']:
 df.drop(['patient_id'], axis=1, inplace=True)
 ```
 
-- Train Data: For the train data, in 'f_patient_id', we added the number of visits for that patient_id, from the train and test data and assign it to that column,
+- Test Data: For the train data, in 'f_patient_id', we added the number of visits for that patient_id, from the train and test data and assign it to that column,
 
 ```python
 cnt_dict_1 = test_df['patient_id'].value_counts()
