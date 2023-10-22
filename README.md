@@ -77,14 +77,152 @@ upper_whisker = Q3 + 1.5 * IQR
 ```
 ### Grouping / Not Grouping
 
+#### Diagnosis Columns (diag_1, diag_2, diag_3)
 
-### Label / OHE / Avg for age
+```python
+def change_diagnosis(value):    
+    if value >= 1 and value <= 139:
+        return "D1"
+    elif value <= 239:
+        return "D2"
+    elif value <= 279:
+        return "D3"
+    elif value <= 289:
+        return "D4"
+    elif value <= 319:
+        return "D5"
+    elif value <= 389:
+        return "D6"
+    elif value <= 459:
+        return "D7"
+    elif value <= 519:
+        return "D8"
+    elif value <= 579:
+        return "D9"
+    elif value <= 629:
+        return "D9"
+    elif value <= 679:
+        return "D10"
+    elif value <= 709:
+        return "D11"
+    elif value <= 739:
+        return "D12"
+    elif value <= 759:
+        return "D13"
+    elif value <= 779:
+        return "D14"
+    elif value <= 799:
+        return "D15"
+    elif value <= 999:
+        return "D16"
+    elif value == 1000:
+        return "D17"
+    else:
+        return "D0"
+```
+
+This grouping strategy followed the standard ICD9 Codes. These categorical values were later one-hot encoded. Later, however since it was noticed that this grouping did not increase the validation score/ accuracy on kaggle, we decided to drop the 3 columns.
+
+### Age variable
+
+In order to deal with the categorical variable 'age' which has values like [0-10), [10-20) and so on, we tried the following approaches: 
+
+- We tried label encoding the variable. Label encoding captures the inherent order of the age categories. The label encoding would assign consecutive numerical values, such as 0 for [0-10), 1 for [10-20), 2 for [20-30), and so on. This maintains the natural order, allowing the algorithm to understand and leverage the ordinal nature of the data.
+```python
+label_encoder = LabelEncoder()
+df["age"] = label_encoder.fit_transform(df["age"])
+```
+- We tried an average based approach to convert the column to a numerical variable:
+
+```python
+def change_age(value):
+    if(value == '[0-10)'):
+        return 5
+    elif(value == '[10-20)'):
+        return 15
+    elif(value == '[20-30)'):
+        return 25
+    elif(value == '[30-40)'):
+        return 35
+    elif(value == '[40-50)'):
+        return 45
+    elif(value == '[50-60)'):
+        return 55
+    elif(value == '[60-70)'):
+        return 65
+    elif(value == '[70-80)'):
+        return 75
+    elif(value == '[80-90)'):
+        return 85
+    elif(value == '[90-100)'):
+        return 95
+```
+
+However we noticed that both these appraches led to a very similar validation score as well as accuracy on kaggle. Hence, we stuck with the Label Encoding approach.
 
 ## New Columns Introduced
+
 ### Drug change counting
+
+The different drugs have 4 possible values : 
+
+- Up
+- Down
+- Steady
+- No
+
+Since there are many durgs but only 4 possible values for each row, we decided to introduce 4 new columns each of which counts the number of Up's, Down's, Steady's and No's for each row across all rows. We then drop all the columns that corresponds to drugs.
+
+```python
+drugs_cols = ["metformin", "repaglinide", "nateglinide", "chlorpropamide", "glimepiride", "acetohexamide", "glipizide", "glyburide", "tolbutamide", "pioglitazone", "rosiglitazone", "acarbose", "miglitol", "troglitazone", "tolazamide", "examide", "citoglipton", "insulin", "glyburide-metformin", "glipizide-metformin", "glimepiride-pioglitazone", "metformin-rosiglitazone", "metformin-pioglitazone"]
+
+def count_up(row):
+    return sum([1 for col in drugs_cols if row[col] in ['Up']])
+
+def count_down(row):
+    return sum([1 for col in drugs_cols if row[col] in ['Down']])
+
+def count_steady(row):
+    return sum([1 for col in drugs_cols if row[col] in ['Steady']])
+
+def count_no(row):
+    return sum([1 for col in drugs_cols if row[col] in ['No']])
+
+# Apply the function row-wise
+df['count_up'] = df.apply(count_up, axis=1)
+df['count_down'] = df.apply(count_down, axis=1)
+df['count_steady'] = df.apply(count_steady, axis=1)
+df['count_no'] = df.apply(count_no, axis=1)
+df.drop(drugs_cols, axis=1, inplace=True)
+```
+
 ### ! Grouping Numerical values for inpatient / outpatient / emergency
 
 ### Frequency for patient_id
+
+- Test Data: We introduced a new column called 'f_patient_id' which counts the number of visits for a given patient_id and assigns that number to all rows that corresponds to that patient_id.
+
+```python
+df['f_patient_id'] = df['patient_id'].copy(deep=True)
+cnt_dict = df['patient_id'].value_counts()
+for i in df['patient_id']:
+    idx = df[df['f_patient_id'] == i].index
+    df.loc[idx, 'f_patient_id'] = cnt_dict[i]
+df.drop(['patient_id'], axis=1, inplace=True)
+```
+
+- Train Data: For the train data, in 'f_patient_id', we added the number of visits for that patient_id, from the train and test data and assign it to that column,
+
+```python
+cnt_dict_1 = test_df['patient_id'].value_counts()
+test_df['f_patient_id'] = test_df['patient_id'].copy(deep=True)
+for i in test_df['patient_id']:
+    idx = test_df[test_df['f_patient_id'] == i].index
+    if cnt_dict.get(i) != None and cnt_dict[i] != 0:
+        test_df.loc[idx, 'f_patient_id'] = cnt_dict_1[i] + cnt_dict[i]
+    else:
+        test_df.loc[idx, 'f_patient_id'] = cnt_dict_1[i]
+```
 
 # Model Selection and Training
 
