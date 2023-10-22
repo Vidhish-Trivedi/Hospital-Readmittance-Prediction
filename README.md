@@ -219,7 +219,7 @@ for i in df['patient_id']:
 df.drop(['patient_id'], axis=1, inplace=True)
 ```
 
-- Test Data: For the train data, in 'f_patient_id', we added the number of visits for that patient_id, from the train and test data and assign it to that column,
+- Test Data: For the test data, in 'f_patient_id', we added the number of visits for that patient_id, from the train and test data and assign it to that column.
 
 ```python
 cnt_dict_1 = test_df['patient_id'].value_counts()
