@@ -171,7 +171,7 @@ The different drugs have 4 possible values :
 - Steady
 - No
 
-Since there are many durgs but only 4 possible values for each row, we decided to introduce 4 new columns each of which counts the number of Up's, Down's, Steady's and No's for each row across all rows. We then drop all the columns that corresponds to drugs.
+Since there are many drugs but only 4 possible values for each row, we decided to introduce 4 new columns each of which counts the number of Up's, Down's, Steady's and No's for each row, across all rows. We then drop all the columns that corresponds to drugs.
 
 ```python
 drugs_cols = ["metformin", "repaglinide", "nateglinide", "chlorpropamide", "glimepiride", "acetohexamide", "glipizide", "glyburide", "tolbutamide", "pioglitazone", "rosiglitazone", "acarbose", "miglitol", "troglitazone", "tolazamide", "examide", "citoglipton", "insulin", "glyburide-metformin", "glipizide-metformin", "glimepiride-pioglitazone", "metformin-rosiglitazone", "metformin-pioglitazone"]
@@ -196,8 +196,16 @@ df['count_no'] = df.apply(count_no, axis=1)
 df.drop(drugs_cols, axis=1, inplace=True)
 ```
 
-### ! Grouping Numerical values for inpatient / outpatient / emergency
+### Grouping Numerical values for inpatient / outpatient / emergency
 
+For the number_outpatient, number_emergency and number_inpatient, we tried adding the three values and assigning a new column called num_visits.
+
+```python
+df['num_visits'] = df["number_outpatient"] + df["number_inpatient"] + df["number_emergency"]
+df.drop(["number_outpatient", "number_inpatient", "number_emergency"],axis=1, inplace = True)
+```
+
+However we noticed that this apprach led to a very similar validation score to when the three columns existed individually. Hence, we stuck with the 3 original columns.
 ### Frequency for patient_id
 
 - Test Data: We introduced a new column called 'f_patient_id' which counts the number of visits for a given patient_id and assigns that number to all rows that corresponds to that patient_id.
