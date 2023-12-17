@@ -1,7 +1,7 @@
+- Teaching Assistant In-charge: Sarthak Harne
 - Vidhish Trivedi - IMT2021055
 - Barath S Narayan - IMT2021524
 - Vikas Kalyanapuram - IMT2021040
-- Teaching Assistant In-charge: Sarthak Harne
 ---
 ## Table of Contents
 - [First Half](#first%20half)
@@ -47,6 +47,9 @@
       + [Metric For Evaluations](#metric%20for%20evaluations)
       + [Training Details](#training%20details-1)
       + [Best Scores on Kaggle](#best%20scores%20on%20kaggle-1)
+   * [Model fitting for Ensemble Methods](#Model-fitting-for-Ensemble-Methods)
+   * [Conclusion](#Conclusion)
+   * [References](#References)
 # First Half
 ---
 ## Dataset Description
@@ -442,7 +445,9 @@ Subsequently, an Artificial Neural Network was constructed to forecast the readm
 
 Through multiple iterations of experiments and training, the following hyperparameters were decided upon:
 ### Hyperparameters For The Neural Network
+Hyperparameters (*Number of hidden layers, number of neurons in each hidden layer, dropout, learning rate, etc*) were optimized using the Optuna library to find the best parameters.
 
+Methods like f1_score, confusion_matrix, and accuracy_score were used during validation.
 ```Python
 # Building the neural network for multi-class classification
 model = tf.keras.Sequential([
@@ -475,7 +480,7 @@ model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accur
 
 Each layer within the model incorporates batch normalization, a technique applied to ensure that successive layers receive appropriately scaled data, thereby enhancing the ease of processing.
 ### Training Details
-- Number of Epochs - 10
+- Number of Epochs - 10, a summary is given below:
 
 | Epoch | Loss | Accuracy | Val Loss | Val Accuracy |
 | -- | -- | -- | -- | -- |
@@ -528,13 +533,59 @@ print(f'RBF Kernel Accuracy: {accuracy_rbf}')
 ```
 
 ### Metric For Evaluations
-- Metric - Accuracy
+- Methods like f1_score, confusion_matrix, and accuracy_score were used during validation.
 ### Training Details
+Hyperparameters (*C, gamma, choice of kernel, etc*) were optimized using the Optuna library to find the best parameters.
+- We finally used the `rbf` kernel, and the hyperparameters such as `C` and `gamma` were optimized.
+- `C` is the regularization parameter, controlling the trade-off between achieving a smooth decision boundary and classifying training points correctly.
+- `gamma` - Kernel coefficient for `rbf` kernel, controlling the shape of the boundary.
 
 | Kernel | Accuracy |
 | -- | -- |
 | poly (degree=3) | 0.7142 |
 | rbf | 0.7127 |
 ### Best Scores on Kaggle
-- Using `poly` kernel with degree 3: 
+- Using `poly` kernel with degree 3: 0.721
 - Using `rbf` kernel: 0.72
+## Model fitting for Ensemble Methods
+This is a summary of ensemble methods explored as part of this assignment.
+  
+
+| Model | Result on Kaggle | Approach |
+| -- | -- | -- |
+|Random Forest Classifier | 0.564 | One-Hot Encoding after grouping diags |
+|Random Forest Classifier | 0.566 | One-Hot Encoding after grouping diags, admission_source_id, admission_type_id, discharge_disposition_id |
+|Random Forest Classifier | 0.574 | Hyper Parameter Tuning |
+|Random Forest Classifier | 0.576 | Dropping select drug dosage columns where majority of values belong to one category |
+|Random Forest Classifier | 0.578 | Added outlier detection |
+
+| | | |
+| - | - | - |
+|XGB Classifier | 0.584 | Dropped all diags, no groupings for ids |
+|XGB Classifier | 0.598 | Keep enc_id, patient_id |
+|LGBM Classifier | 0.604 | Switched to LGBM classifier |
+|LGBM Classifier | 0.609 | Hyper Parameter Tuning |
+|LGBM Classifier | 0.608 | Hyper Parameter Tuning |
+|LGBM Classifier | 0.637 | Use frequency of patient_id as a column |
+|LGBM Classifier | 0.643 | Hyper Parameter Tuning |
+|LGBM Classifier | 0.648 | test_patient_id_freq = train_patient_freq |
+|LGBM Classifier | 0.721 | test_patient_id_freq = train_patient_freq + test_patient_freq. Count Up, Down, No, and Steady separately in drug dosage columns |
+|LGBM Classifier | 0.725 | Hyper Parameter Tuning  |
+
+Best Accuracy with 3-model approach: 0.708 on Kaggle.
+**Best Accuracy (Overall)** = *0.725 on Kaggle*
+
+The hyper parameters for the Random Forest and Gradient Boosting Classifiers were optimized using Optuna, by running at least 10 instances of each over a range of hyper parameter values. Additionally, we also tried using another model called `CatBoost` and also experimented with class_weights (*seeing how the dataset was class imbalanced*).
+## Conclusion
+The SVM methods and Neural Networks both give similar results on Kaggle when compared to boosting methods (specifically, the LGBM classifier).
+
+Unlike the LGBM classifier, both SVM and Neural Networks take significantly longer to train (difference of up to 10 times), and thus, we prefer the former to be our model of choice.
+## References
+- Numpy documentation : https://numpy.org/doc/1.26/user/index.html
+- Optuna documentation : https://optuna.readthedocs.io/en/stable/
+- Pandas documentation : https://pandas.pydata.org/docs/
+- Matplotlib.pyplot documentation : https://matplotlib.org/stable/users/index.html
+- List of ICD-9 codes : https://en.wikipedia.org/wiki/List_of_ICD-9_codes
+- Seaborn documentation : https://seaborn.pydata.org/tutorial.html
+- Scikit learn documentation : https://scikit-learn.org/stable/
+- PyTorch documentation : https://pytorch.org/docs/stable/index.html
